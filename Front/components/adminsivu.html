@@ -1,0 +1,1564 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>adminsivu</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <!------------------->
+
+    <!----JQUERY---------->
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
+    <script>
+        $(function () {
+            $("#tabs").tabs({
+                collapsible: true
+            });
+        });
+    </script>
+
+    <!-- Option 1: Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+
+    <!-- Option 2: Separate Popper and Bootstrap JS -->
+    <!--
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+    -->
+
+    <script>
+        $(document).ready(function () {
+            // CSS-styles---->
+            $("#bg").css({ background: 'linear-gradient(#438edf, #5e99d8, #85add6, #bcd1e7, #dbe6f1, white)' });
+            //----------------
+            $("#mista").change(function () {
+                $("#mihin").attr('min', $("#mista").val());
+            });
+            $("#mistaOL").change(function () {
+                $("#mihinOL").attr('min', $("#mistaOL").val());
+            });
+            $("#success-alert").hide();
+            $("#fail-alert").hide();
+            $("#poistettu-alert").hide();
+            $("#successMokLisays-alert").hide();
+            $("#failMokLisays-alert").hide();
+            $("#successMokPoisto-alert").hide();
+            $("#failMokPoisto-alert").hide();
+            $("#successMokMuokkaa-alert").hide();
+            $("#failMokMuokkaa-alert").hide();
+            $("#successPalveluLisays-alert").hide();
+            $("#failPalveluLisays-alert").hide();
+            $("#successPalveluPoisto-alert").hide();
+            $("#failPalveluPoisto-alert").hide();
+            $("#successPalveluMuokkaa-alert").hide();
+            $("#failPalveluMuokkaa-alert").hide();
+
+            // MUOKKAA VARAUSTA NAPPI
+            $("#varaukset").on('click', '.muokkaaVarausta', function () {
+                var muokattava = $(this).parent().parent();
+                var varausId = muokattava.prop('id').split('-')[1];
+                $("#tallennaVarauksenMuutokset").attr('data-varausid', varausId);
+                $("#tallennaVarauksenMuutokset").attr('data-asiakas_id', muokattava.attr('data-asiakas_id'));
+                console.log(muokattava);
+                $("#metunimi").val(muokattava.attr('data-etunimi'));
+                $("#msukunimi").val(muokattava.attr('data-sukunimi'));
+                $("#lahiosoite").val(muokattava.attr('data-lahiosoite'));
+                $("#postinro").val(muokattava.attr('data-postinro'));
+                $("#email").val(muokattava.attr('data-email'));
+                $("#puhelinnro").val(muokattava.attr('data-puhelinnro'));
+                $("#mtoimipaikka").val(muokattava.attr('data-toimipaikka'));
+                if (muokattava.attr('data-sahkopostilasku') == "1") {
+                    $("#sahkopostilasku").prop('checked', true);
+                }
+                if (muokattava.attr('data-paperilasku') == "1") {
+                    $("#paperilasku").prop('checked', true);
+                }
+
+                return false;
+            });
+
+            // TALLENNA VRAUKSEN MUUTOKSET
+            $("#tallennaVarauksenMuutokset").click(function () {
+                let varaus_id = $("#tallennaVarauksenMuutokset").attr('data-varausid');
+                let asiakas_id = $("#tallennaVarauksenMuutokset").attr('data-asiakas_id');
+                let etunimi = $("#metunimi").val();
+                let sukunimi = $("#msukunimi").val();
+                let lahiosoite = $("#lahiosoite").val();
+                let postinro = $("#postinro").val();
+                let email = $("#email").val();
+                let puhelinnro = $("#puhelinnro").val();
+                let toimipaikka = $("#mtoimipaikka").val();
+
+                let sahkopostilasku = $("#sahkopostilasku").is(":checked");
+                let paperilasku = $("#paperilasku").is(":checked");
+
+                $.ajax({
+                    url: "http://localhost:3007/api/tilaus/" + varaus_id,
+                    method: 'put',
+                    data: JSON.stringify({ asiakas_id: asiakas_id, etunimi: etunimi, sukunimi: sukunimi, lahiosoite: lahiosoite, postinro: postinro, email: email, puhelinnro: puhelinnro, sahkopostilasku: sahkopostilasku, paperilasku: paperilasku, toimipaikka: toimipaikka }),
+                    contentType: "application/json",
+                    dataType: 'json',
+
+                    success: function (data) {
+                        $("#peruutaVarauksenMuutokset").click();
+                        $("#haeVaraukset").click();
+                    },
+                    error: function (jqXHR, textStatus) {
+
+                    }
+                })
+                return false;
+            });
+
+            // LATAA ALUEET JA NIIDEN MÖKIT
+            $.ajax(
+                {
+                    url: "http://localhost:3007/api/mokki",
+                    method: 'get',
+                    success: function (data) {
+                        var mokkiid = -1;
+                        $.each(data, function (index, json_obj) {
+                            if (mokkiid != json_obj.mokki_id) {
+                                $("#mokkiLista").append("<option value='" + json_obj.mokki_id + "'>" + json_obj.alue + " - " + json_obj.mokkinimi + "</option>");
+                                mokkiid = json_obj.mokki_id;
+                            }
+                        });
+                    },
+                    error: function (jqXHR, textStatus) {
+                        console.log("Error: textStatus=" + textStatus)
+                    }
+                }
+            )
+
+
+            // // LATAA PALVELUT KOHTEEN(ALUE) 1 PERUSTEELLA SIVUN LATAUTUESSA
+            // $.ajax(
+            //     {
+            //         url: "http://localhost:3007/api/palvelu/1",
+            //         method: 'get',
+            //         success: function (data) {
+            //             $.each(data, function (index, json_obj) {
+            //                 $("#palveluLista").append("<option value='" + json_obj.palvelu_id + "'>" + json_obj.nimi + ": " + json_obj.kuvaus + " " + json_obj.hinta + " €" + "</option>");
+            //             });
+            //         },
+            //         error: function (jqXHR, textStatus) {
+            //             console.log("Error: textStatus=" + textStatus)
+            //         }
+            //     }
+            // )
+
+
+            // // LATAA PALVELUT VALITUN KOHTEEN(ALUEEN) PERUSTEELLA
+            // $("#kohde").change(function () {
+
+            //     alue_id = $("#kohde").val();
+            //     haku = "http://localhost:3007/api/palvelu/" + alue_id;
+
+            //     $.ajax(
+            //         {
+            //             url: haku,
+            //             method: 'get',
+            //             success: function (data) {
+            //                 $.each(data, function (index, json_obj) {
+            //                     $("#palveluLista").append("<option value='" + json_obj.palvelu_id + "'>" + json_obj.nimi + ": " + json_obj.kuvaus + " " + json_obj.hinta + " €" + "</option>");
+            //                 });
+            //             },
+            //             error: function (jqXHR, textStatus) {
+            //                 console.log("Error: textStatus=" + textStatus)
+            //             }
+            //         }
+            //     )
+            // });
+
+            // HAE VARAUKSEt
+            $("#haeVaraukset").click(function () {
+                let varaus_id = $("#varausid").val();
+                let etunimi = $("#etunimi").val();
+                let sukunimi = $("#sukunimi").val();
+                let Haku = "http://localhost:3007/api/customerorders?";
+
+                let he = [];
+
+                if (varaus_id != "") {
+                    he.push("varaus_id=" + varaus_id);
+                }
+                if (etunimi != "") {
+                    he.push("etunimi=" + etunimi);
+                }
+                if (sukunimi != "") {
+                    he.push("sukunimi=" + sukunimi)
+                }
+                let query = "";
+                if (he.length > 0) {
+                    query = he.join("&");
+                }
+
+                Haku += query;
+                console.log(Haku);
+
+                $.ajax(
+                    {
+                        url: Haku,
+                        method: 'get',
+                        success: function (data) {
+
+                            $("#varaukset").empty();
+
+                            $.each(data, function (index, json_obj) {
+                                $("#varaukset").append("<tr class=' mt-1 p-1 align-baseline' data-toimipaikka='" + json_obj.toimipaikka + "'' data-asiakas_id='" + json_obj.asiakas_id + "' data-etunimi='" + json_obj.etunimi + "' data-sukunimi='" + json_obj.sukunimi + "' data-email='" + json_obj.email + "' data-puhelinnro='" + json_obj.puhelinnro + "' data-sahkopostilasku='" + json_obj.sahkopostilasku + "' data-paperilasku='" + json_obj.paperilasku + "' data-lahiosoite='" + json_obj.lahiosoite + "' data-postinro='" + json_obj.postinro + "' id='varaus-" + json_obj.varaus_id + "' ><td class='varaustunnus'>" + json_obj.varaus_id + "</td><td class='etunimijasukunimi'>" + json_obj.etunimi + " " + json_obj.sukunimi + "</td><td class='kohde'>" + json_obj.nimi + "</td><td class='mokki'>" + json_obj.mokkinimi + "</td><td class='SMokkiOsoite'>" + json_obj.varattu_alkupvm.substring(0, 10) + "</td><td class='SHenkilomaara'>" + json_obj.varattu_loppupvm.substring(0, 10)
+                                    + "</td><td class='SMokkiHinta'>" + json_obj.summa + "</td><td><button id='" + json_obj.mokki_id + "' class='btn btn-primary muokkaaVarausta mt-1' data-bs-target='#muokkaaVarausta' data-bs-toggle='modal' >Muokkaa</button><button data-id='" + json_obj.varaus_id + "' class='btn btn-primary poistaVaraus mt-1  align-top' style='margin-left:10px;'>Poista</button></td>");
+                            });
+                        },
+                        error: function (jqXHR, textStatus) {
+                            console.log("Error: textStatus=" + textStatus)
+                        }
+                    }
+                )
+                return false;
+            });
+
+            // HAE LASKUT
+            $("#haeLasku").click(function () {
+                let lasku_id = $("#lasku_id").val();
+                let completed = $("#completed").val();
+                let varaus_id = $("#varaus_id").val();
+                // let sukunimi = $("#sukunimi").val();
+                let Haku = "http://localhost:3007/api/lasku?";
+
+                let he = [];
+
+                if (lasku_id != "") {
+                    he.push("lasku_id=" + lasku_id);
+                }
+                if (varaus_id != "") {
+                    he.push("varaus_id=" + varaus_id);
+                }
+                if (completed != "") {
+                    he.push("completed=" + completed);
+                }
+                // if (etunimi != "") {
+                // he.push("etunimi=" + etunimi);
+                // }
+                // if (sukunimi != "") {
+                // he.push("sukunimi=" + sukunimi)
+                // }
+                let query = "";
+                if (he.length > 0) {
+                    query = he.join("&");
+                }
+
+                Haku += query;
+                debugger;
+                console.log("Laskujen haku: " + Haku);
+
+                $.ajax(
+                    {
+                        url: Haku,
+                        method: 'get',
+                        success: function (data) {
+
+                            $("#laskulista").empty();
+                            console.log("Laskujen hakun data: " + data);
+                            $.each(data, function (index, json_obj) {
+                                $("#laskulista").append("<tr id='lasku-" + json_obj.lasku_id + "' ><td>" + json_obj.lasku_id + "</td><td>" + json_obj.varattu_pvm.substring(0, 10) + "</td><td>" + json_obj.erapaiva.substring(0, 10) + "</td><td style='text-align:center;'>" + (json_obj.paperilasku == 1 ? 'X' : '') + "</td><td style='text-align:center;'>" + (json_obj.sahkopostilasku == 1 ? 'X' : '') + "</td><td>" + json_obj.summa
+                                    + "</td><td>" + (json_obj.completed == 1 ? 'Maksettu' : 'Avoin') + "</td>");
+                                //<td><button id='" + json_obj.mokki_id + "' class='btn btn-primary muokkaaVarausta' data-bs-target='#muokkaaVarausta' data-bs-toggle='modal' >Muokkaa</button><button data-id='" + json_obj.varaus_id + "' class='btn btn-primary poistaVaraus' style='margin-left:10px;'>Poista</button></td>");
+                            });
+                        },
+                        error: function (jqXHR, textStatus) {
+                            console.log("Error: textStatus=" + textStatus)
+                        }
+                    }
+                )
+                return false;
+            });
+
+
+
+            // LATAA PALVELUT
+            $.ajax(
+                {
+                    url: "http://localhost:3007/api/palvelu/",
+                    method: 'get',
+                    success: function (data) {
+                        $.each(data, function (index, json_obj) {
+                            $("#palveluLista").append("<option value='" + json_obj.palvelu_id + "'>" + json_obj.alue + " - " + json_obj.nimi + ": " + json_obj.kuvaus + " " + json_obj.hinta + " €" + "</option>");
+                        });
+                    },
+                    error: function (jqXHR, textStatus) {
+                        console.log("Error: textStatus=" + textStatus)
+                    }
+                }
+            )
+
+            //TALLENTAA JO ENNAKKOON MÖKIN MUOKKAUS MODALIIN MÖKKI SELECTISTÄ VALITUN MÖKIN TIEDOT
+            $("#mokkiLista").change(function () {
+
+                let muokattavanMokinID = $("#mokkiLista").val();
+
+                let idhaku = "http://localhost:3007/api/mokki?mokki_id=" + muokattavanMokinID;
+                console.log(muokattavanMokinID);
+                $.ajax(
+                    {
+                        url: idhaku,
+                        method: 'get',
+                        success: function (data) {
+                            $.each(data, function (index, json_obj) {
+                                $("#kohdeMMM").val(json_obj.alue_id);
+                                $("#MmokinNimi").val(json_obj.mokkinimi);
+                                $("#Mpostinumero").val(json_obj.postinro);
+                                $("#Mkatuosoite").val(json_obj.katuosoite);
+                                $("#Mhinta").val(json_obj.hinta);
+                                $("#Mkuvaus").val(json_obj.mökinkuvaus);
+                                $("#Mhenkilomaara").val(json_obj.henkilomaara);
+                                $("#Mvarustelu").val(json_obj.varustelu);
+                            });
+                        },
+                        error: function (jqXHR, textStatus) {
+                            console.log("Error: textStatus=" + textStatus)
+                        }
+                    }
+                )
+            });
+
+            //TALLENTAA JO ENNAKKOON PALVELUN MUOKKAUS MODALIIN PALVELU SELECTISTÄ VALITUN PALVELUN TIEDOT
+            $("#palveluLista").change(function () {
+
+                let muokattavanPalvelunID = $("#palveluLista").val();
+
+                let idhaku = "http://localhost:3007/api/palvelu?palvelu_id=" + muokattavanPalvelunID;
+                console.log(muokattavanPalvelunID);
+                $.ajax(
+                    {
+                        url: idhaku,
+                        method: 'get',
+                        success: function (data) {
+                            $.each(data, function (index, json_obj) {
+                                $("#kohdePMM").val(json_obj.alue_id);
+                                $("#MpalvelunNimi").val(json_obj.nimi);
+                                $("#MpalvelunTyyppi").val(json_obj.tyyppi);
+                                $("#MpalvelunKuvaus").val(json_obj.kuvaus);
+                                $("#MpalvelunHinta").val(json_obj.hinta);
+
+                            });
+                        },
+                        error: function (jqXHR, textStatus) {
+                            console.log("Error: textStatus=" + textStatus)
+                        }
+                    }
+                )
+            });
+
+            // LATAA ALUEET 
+            $.ajax(
+                {
+                    url: "http://localhost:3007/api/alue",
+                    method: 'get',
+                    success: function (data) {
+                        $.each(data, function (index, json_obj) {
+                            $("#kohde").append("<option value='" + json_obj.alue_id + "'>" + json_obj.nimi + "</option>");
+                        });
+                        $.each(data, function (index, json_obj) {
+                            $("#kohdeMLM").append("<option value='" + json_obj.alue_id + "'>" + json_obj.nimi + "</option>");
+                        });
+                        $.each(data, function (index, json_obj) {
+                            $("#kohdeMMM").append("<option value='" + json_obj.alue_id + "'>" + json_obj.nimi + "</option>");
+                        });
+                        $.each(data, function (index, json_obj) {
+                            $("#kohdePalvelu").append("<option value='" + json_obj.alue_id + "'>" + json_obj.nimi + "</option>");
+                        });
+                        $.each(data, function (index, json_obj) {
+                            $("#kohdePMM").append("<option value='" + json_obj.alue_id + "'>" + json_obj.nimi + "</option>");
+                        });
+                        $.each(data, function (index, json_obj) {
+                            $("#kohdeMR").append("<option value='" + json_obj.alue_id + "'>" + json_obj.nimi + "</option>");
+                        });
+                        $.each(data, function (index, json_obj) {
+                            $("#kohdeOL").append("<option value='" + json_obj.alue_id + "'>" + json_obj.nimi + "</option>");
+                        });
+
+                    },
+                    error: function (jqXHR, textStatus) {
+                        console.log("Error: textStatus=" + textStatus)
+                    }
+                }
+            )
+            $("#logout").click(function () {
+                window.location.replace("etusivu.html")
+            });
+
+            // POISTAA VARAUKSEN
+            $("#varaukset").on('click', '.poistaVaraus', function () {
+                if (!confirm("Haluatko varmasti poistaa varauksen?")) {
+                    return false;
+                }
+                let varausId = $(this).attr('data-id');
+                console.log("POistetaan: " + varausId);
+                poistaVaraus(varausId);
+            })
+
+            // POISTAA TOIMIPISTEEN
+            $("#poistaToimipiste").click(function () {
+                let poistettavanTPID = $("#kohde").val();
+                poistaToimipiste(poistettavanTPID);
+            })
+
+
+            // POISTAA MÖKIN
+            $("#poistaMokki").click(function () {
+                let poistettavanMokinID = $("#mokkiLista").val();
+                console.log(poistettavanMokinID);
+                poistaMokki(poistettavanMokinID);
+            })
+
+            // MUOKKAA MÖKIN
+            $("#muokkaaMokki").click(function () {
+                let muokattavanMokinID = $("#mokkiLista").val();
+                console.log(muokattavanMokinID);
+                muokkaaMokki(muokattavanMokinID);
+            })
+
+
+            // POISTAA PALVELUN
+            $("#poistaPalvelu").click(function () {
+                let poistettavanPalvelunID = $("#palveluLista").val();
+                poistaPalvelu(poistettavanPalvelunID);
+            })
+
+            // MUOKKAA PALVELUN
+            $("#muokkaaPalvelu").click(function () {
+                let muokattavanPalvelunID = $("#palveluLista").val();
+                muokkaaPalvelu(muokattavanPalvelunID);
+            })
+
+
+            // HAKU TIETYLLÄ AIKAVÄLILLÄ VARATTUNA OLEVIIN/OLLEISIIN MÖKKEIHIN
+            $("#haeMR").click(function () {
+
+                let Mista = $("#mista").val();
+                let Mihin = $("#mihin").val();
+                let Kohde = $("#kohdeMR").val();
+                let Haku = "http://localhost:3007/api/majoittuminen?";
+                console.log(Kohde);
+                let hakuMR = [];
+
+
+                if (Mista != "") {
+                    hakuMR.push("alkamisaika=" + Mista);
+                }
+                if (Mihin != "") {
+                    hakuMR.push("loppumisaika=" + Mihin);
+                }
+                if (Kohde != "") {
+                    hakuMR.push("alue=" + Kohde)
+                }
+                let query = "";
+                if (hakuMR.length > 0) {
+                    query = hakuMR.join("&");
+                }
+
+                Haku += query;
+                console.log(Haku);
+
+                $.ajax(
+                    {
+                        url: Haku,
+                        method: 'get',
+                        success: function (data) {
+                            $("#MR").empty();
+                            $.each(data, function (index, json_obj) {
+                                $("#MR").append("<tr><td>" + json_obj.varaus_id + "</td><td>" + json_obj.alkamisaika + "</td><td>" + json_obj.loppumisaika
+                                    + "</td><td>" + json_obj.mokin_nimi + "</td><td>" + json_obj.varaajan_nimi + "</td></tr>");
+                            });
+                        },
+                        error: function (jqXHR, textStatus) {
+                            console.log("Error: textStatus=" + textStatus)
+                        }
+                    }
+                )
+                return false;
+            });
+
+
+            // HAKU TIETYLLÄ AIKAVÄLILLÄ VARATTUNA OLEVIIN/OLLEISIIN PALVELUIHIN
+            $("#haeOL").click(function () {
+
+                let Mista = $("#mistaOL").val();
+                let Mihin = $("#mihinOL").val();
+                let Kohde = $("#kohdeOL").val();
+                Haku = "http://localhost:3007/api/lisapalvelut?";
+
+                let hakuOL = [];
+
+                if (Mista != "") {
+                    hakuOL.push("alkamisaika=" + Mista);
+                }
+                if (Mihin != "") {
+                    hakuOL.push("loppumisaika=" + Mihin);
+                }
+                if (Kohde != "") {
+                    hakuOL.push("alue=" + Kohde)
+                }
+                let query = "";
+                if (hakuOL.length > 0) {
+                    query = hakuOL.join("&");
+                }
+
+                Haku += query;
+                console.log(Haku);
+
+                $.ajax(
+                    {
+                        url: Haku,
+                        method: 'get',
+                        success: function (data) {
+                            $("#OL").empty();
+                            $.each(data, function (index, json_obj) {
+                                $("#OL").append("<tr><td>" + json_obj.varaus_id + "</td><td>" + json_obj.alkamisaika + "</td><td>" + json_obj.loppumisaika
+                                    + "</td><td>" + json_obj.palvelu + "</td><td>" + json_obj.varaajan_nimi + "</td></tr>");
+                            });
+                        },
+                        error: function (jqXHR, textStatus) {
+                            console.log("Error: textStatus=" + textStatus)
+                        }
+                    }
+                )
+            });
+
+
+            // UUDEN TOIMIPISTEEN LISÄYS
+            $("#lisaaToimipiste").click(function () {
+
+                let txtboxToimipisteenNimi = $("#toimipisteenNimi").val();
+                console.log(txtboxToimipisteenNimi);
+                let insertQuery = "http://localhost:3007/api/alue";
+                console.log(insertQuery);
+                $.ajax(
+                    {
+                        url: insertQuery,
+                        method: 'POST',
+                        data: JSON.stringify({ nimi: txtboxToimipisteenNimi }),
+                        contentType: "application/json",
+                        dataType: 'json',
+
+                        success: function (data) {
+                            $("#kohde").empty();
+                            haeToimiPisteet();
+                            $("#success-alert").fadeTo(2000, 500).slideUp(500, function () {
+                                $("#success-alert").slideUp(500);
+                            });
+                        },
+                        error: function (jqXHR, textStatus) {
+                            console.log("Error: textStatus=" + textStatus)
+                        }
+                    }
+                )
+            });
+
+
+            // UUDEN MÖKIN LISÄYS
+            $("#lisaaMokki").click(function () {
+                // muista tsekata, että pitääkö tehä jotain, jotta ottaa valuen jos ei dropdownista valitse mitään vaan arvon pitäisi olla se, mikä on oletuksena sivun latautuessa eli 1
+                let alueid = $("#kohdeMLM").val();
+                let mNimi = $("#mokinNimi").val();
+                let pnumero = $("#postinumero").val();
+                let katuos = $("#katuosoite").val();
+                let hinta = $("#hinta").val();
+                let kuvaus = $("#kuvaus").val();
+                let henkMaara = $("#henkilomaara").val();
+                let varustelu = $("#varustelu").val();
+                let toimipaikka = $("#toimipaikka").val();
+
+                let insertQuery = "http://localhost:3007/api/mokki";
+
+                $.ajax(
+                    {
+                        url: insertQuery,
+                        method: 'POST',
+                        data: JSON.stringify({ alue_id: alueid, postinro: pnumero, mokkinimi: mNimi, katuosoite: katuos, hinta: hinta, kuvaus: kuvaus, henkilomaara: henkMaara, varustelu: varustelu, toimipaikka: toimipaikka }),
+                        contentType: "application/json",
+                        dataType: 'json',
+
+                        success: function (data) {
+                            $("#mokkiLista").empty();
+                            haeMokit();
+                            $("#successMokLisays-alert").fadeTo(2000, 500).slideUp(500, function () {
+                                $("#successMokLisays-alert").slideUp(500);
+                            });
+                        },
+                        error: function (jqXHR, textStatus) {
+                            $("#failMokLisays-alert").fadeTo(2000, 500).slideUp(500, function () {
+                                $("#failMokLisays-alert").slideUp(500);
+                            });
+                        }
+                    }
+                )
+            });
+
+
+            // UUDEN PALVELUN LISÄYS
+            $("#lisaaPalvelu").click(function () {
+
+                let pAlueId = $("#kohdePalvelu").val();
+                let pNimi = $("#palvelunNimi").val();
+                let pTyyppi = $("#palvelunTyyppi").val();
+                let pKuvaus = $("#palvelunKuvaus").val();
+                let pHinta = $("#palvelunHinta").val();
+                //let pALV = $("#palvelunALV").val();
+                console.log("kaöjsdf")
+                let insertQuery = "http://localhost:3007/api/palvelu";
+                console.log(pAlueId, pNimi, pTyyppi, pKuvaus, pHinta);
+                $.ajax(
+                    {
+                        url: insertQuery,
+                        method: 'POST',
+                        data: JSON.stringify({ alue_id: pAlueId, nimi: pNimi, tyyppi: pTyyppi, kuvaus: pKuvaus, hinta: pHinta }),
+                        contentType: "application/json",
+                        dataType: 'json',
+
+                        success: function (data) {
+                            $("#palveluLista").empty();
+                            haePalvelut();
+                            $("#successPalveluLisays-alert").fadeTo(2000, 500).slideUp(500, function () {
+                                $("#successPalveluLisays-alert").slideUp(500);
+                            });
+                        },
+                        error: function (jqXHR, textStatus) {
+                            $("#failPalveluLisays-alert").fadeTo(2000, 500).slideUp(500, function () {
+                                $("#failPalveluLisays-alert").slideUp(500);
+                            });
+                        }
+                    }
+                )
+            });
+        });
+        // Varauksen POISTOLLE FUNKTIO
+        function poistaVaraus(varaus_id) {
+            $.ajax(
+                {
+                    url: "http://localhost:3007/api/tilaus/" + varaus_id,
+                    method: 'delete',
+                    success: function (data) {
+                        $("#varaus-" + varaus_id).remove();
+                    },
+                    error: function (jqXHR, textStatus) {
+                        $("#fail-alert").fadeTo(5000, 500).slideUp(500, function () {
+                            $("#fail-alert").slideUp(500);
+                        });
+                    }
+                }
+            )
+        }
+        // TOIMIPISTEEN POISTOLLE FUNKTIO
+        function poistaToimipiste(id) {
+            $.ajax(
+                {
+                    url: "http://localhost:3007/api/alue/" + id,
+                    method: 'delete',
+                    success: function (data) {
+                        $("#kohde").empty();
+                        haeToimiPisteet();
+                        $("#poistettu-alert").fadeTo(2000, 500).slideUp(500, function () {
+                            $("#poistettu-alert").slideUp(500);
+                        });
+                    },
+                    error: function (jqXHR, textStatus) {
+                        $("#fail-alert").fadeTo(5000, 500).slideUp(500, function () {
+                            $("#fail-alert").slideUp(500);
+                        });
+                    }
+                }
+            )
+        }
+
+        // MÖKIN POISTOLLE FUNKTIO
+        function poistaMokki(id) {
+            $.ajax(
+                {
+                    url: "http://localhost:3007/api/mokki/" + id,
+                    method: 'delete',
+                    success: function (data) {
+                        $("#mokkiLista").empty();
+                        haeMokit();
+                        $("#successMokPoisto-alert").fadeTo(2000, 500).slideUp(500, function () {
+                            $("#successMokPoisto-alert").slideUp(500);
+                        });
+                    },
+                    error: function (jqXHR, textStatus) {
+                        $("#failMokPoisto-alert").fadeTo(5000, 500).slideUp(500, function () {
+                            $("#failMokPoisto-alert").slideUp(500);
+                        });
+                    }
+                }
+            )
+        }
+
+        function poistaPalvelu(id) {
+            $.ajax(
+                {
+                    url: "http://localhost:3007/api/palvelu/" + id,
+                    method: 'delete',
+                    success: function (data) {
+                        $("#palveluLista").empty();
+                        haePalvelut();
+                        $("#successPalveluPoisto-alert").fadeTo(2000, 500).slideUp(500, function () {
+                            $("#successPalveluPoisto-alert").slideUp(500);
+                        });
+                    },
+                    error: function (jqXHR, textStatus) {
+                        $("#failPalveluPoisto-alert").fadeTo(2000, 500).slideUp(500, function () {
+                            $("#failPalveluPoisto-alert").slideUp(500);
+                        });
+                    }
+                }
+            )
+        };
+
+        // MÖKIN MUOKKAUS FUNKTIO
+        function muokkaaMokki(id) {
+            let alueid = $("#kohdeMMM").val();
+            let mNimi = $("#MmokinNimi").val();
+            let pnumero = $("#Mpostinumero").val();
+            let katuos = $("#Mkatuosoite").val();
+            let hinta = $("#Mhinta").val();
+            let kuvaus = $("#Mkuvaus").val();
+            let henkMaara = $("#Mhenkilomaara").val();
+            let varustelu = $("#Mvarustelu").val();
+            let toimipaikka = $("#Mtoimipaikka").val();
+
+            $.ajax(
+                {
+                    url: "http://localhost:3007/api/mokki/" + id,
+                    method: 'put',
+                    data: JSON.stringify({ alue_id: alueid, postinro: pnumero, mokkinimi: mNimi, katuosoite: katuos, hinta: hinta, kuvaus: kuvaus, henkilomaara: henkMaara, varustelu: varustelu, toimipaikka: toimipaikka }),
+                    contentType: "application/json",
+                    dataType: 'json',
+                    success: function (data) {
+                        $("#mokkiLista").empty();
+                        haeMokit();
+                        $("#successMokMuokkaa-alert").fadeTo(2000, 500).slideUp(500, function () {
+                            $("#successMokMuokkaa-alert").slideUp(500);
+                        });
+                    },
+                    error: function (jqXHR, textStatus) {
+                        $("#failMokMuokkaa-alert").fadeTo(5000, 500).slideUp(500, function () {
+                            $("#failMokMuokkaa-alert").slideUp(500);
+                        });
+                    }
+                }
+            )
+        }
+
+
+        // PALVELUN MUOKKAUS FUNKTIO
+        function muokkaaPalvelu(id) {
+            let pAlueId = $("#kohdePMM").val();
+            let pNimi = $("#MpalvelunNimi").val();
+            let pTyyppi = $("#MpalvelunTyyppi").val();
+            let pKuvaus = $("#MpalvelunKuvaus").val();
+            let pHinta = $("#MpalvelunHinta").val();
+
+
+            $.ajax(
+                {
+                    url: "http://localhost:3007/api/palvelu/" + id,
+                    method: 'put',
+                    data: JSON.stringify({ alue_id: pAlueId, nimi: pNimi, tyyppi: pTyyppi, kuvaus: pKuvaus, hinta: pHinta }),
+                    contentType: "application/json",
+                    dataType: 'json',
+                    success: function (data) {
+                        $("#palveluLista").empty();
+                        haePalvelut();
+                        $("#successPalveluMuokkaa-alert").fadeTo(2000, 500).slideUp(500, function () {
+                            $("#successPalveluMuokkaa-alert").slideUp(500);
+                        });
+                    },
+                    error: function (jqXHR, textStatus) {
+                        $("#failPalveluMuokkaa-alert").fadeTo(5000, 500).slideUp(500, function () {
+                            $("#failPalveluMuokkaa-alert").slideUp(500);
+                        });
+                    }
+                }
+            )
+        }
+
+
+        // MÖKKIEN HAULLE FUNKTIO
+        function haeMokit() {
+            $.ajax(
+                {
+                    url: "http://localhost:3007/api/mokki",
+                    method: 'get',
+                    success: function (data) {
+                        $.each(data, function (index, json_obj) {
+                            $("#mokkiLista").append("<option value='" + json_obj.mokki_id + "'>" + json_obj.alue + " - " + json_obj.mokkinimi + "</option>");
+                        });
+                    },
+                    error: function (jqXHR, textStatus) {
+                        console.log("Error: textStatus=" + textStatus)
+                    }
+                }
+            )
+        }
+
+
+        // TOIMIPISTEIDEN HAULLE FUNKTIO
+        function haeToimiPisteet() {
+            $.ajax(
+                {
+                    url: "http://localhost:3007/api/alue",
+                    method: 'get',
+                    success: function (data) {
+                        $.each(data, function (index, json_obj) {
+                            $("#kohde").append("<option value='" + json_obj.alue_id + "'>" + json_obj.nimi + "</option>");
+                        });
+                    },
+                    error: function (jqXHR, textStatus) {
+                        console.log("Error: textStatus=" + textStatus)
+                    }
+                }
+            )
+        }
+
+        function haePalvelut() {
+            $.ajax(
+                {
+                    url: "http://localhost:3007/api/palvelu/",
+                    method: 'get',
+                    success: function (data) {
+                        $.each(data, function (index, json_obj) {
+                            $("#palveluLista").append("<option value='" + json_obj.palvelu_id + "'>" + json_obj.alue + " - " + json_obj.nimi + ": " + json_obj.kuvaus + " " + json_obj.hinta + " €" + "</option>");
+                        });
+                    },
+                    error: function (jqXHR, textStatus) {
+                        console.log("Error: textStatus=" + textStatus)
+                    }
+                })
+        }
+
+    </script>
+</head>
+
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-md navbar-light" id="bg" style="background-color: #dbe6f1;
+                                                                    padding-top: 4vh; 
+                                                                    padding-bottom:4vh;
+                                                                    padding-left:5vh;
+                                                                    padding-right:5vh">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="adminsivu.html">
+                <img src="../img/vp1.png" alt="" width="300" height="45">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#hampurilainen"
+                aria-controls="hampurilainen" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="hampurilainen">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="logout" role="button" data-bs-toggle="dropdown"
+                            aria-expanded="false" style="font-weight: bold; font-size: large">
+                            Kirjaudu ulos
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div id="tabs">
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link" aria-current="page" href="#tabs-1">Perustiedot</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#tabs-2">Varaukset</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#tabs-3">Laskut</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#tabs-4">Varausraportit</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#tabs-5">Lisäpalveluraportit</a>
+            </li>
+        </ul>
+
+        <div class="tab-content" style="padding-top: 4vh; 
+                                        padding-bottom:40vh;
+                                        padding-left:5vh;
+                                        padding-right:5vh">
+            <!-- Perustiedot -->
+            <div id="tabs-1">
+                <div class="container-fluid">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-md-4 mt-4">
+                                <label for="kohde" class="col-sm-3 col-form-label">Toimipiste:</label>
+                                <select name="kohde" id="kohde" class="form-control" name="kohde">
+                                </select>
+                                <div class="col-sm 2, mt-4">
+                                    <button type="submit" class="btn btn-primary ms-0 " data-bs-toggle="modal"
+                                        data-bs-target="#LisaaToimipiste">Lisää toimipiste</button>
+                                    <button type="submit" class="btn btn-primary" data-bs-toggle="modal"
+                                        data-bs-target="#PoistaToimipiste">Poista</button>
+                                        <div class="alert alert-primary col-sm-auto mt-4" id="success-alert">
+                                            <strong>Toimipaikka lisätty!</strong>
+                                        </div>
+                                        <div class="alert alert-warning col-sm-auto mt-4" id="fail-alert">
+                                            <strong>Ei voi poistaa!</strong> Alueeseen liittyy mökkejä ja palveluita, poista
+                                            ne
+                                            ensin!
+                                        </div>
+                                        <div class="alert alert-primary col-sm-auto mt-4" id="poistettu-alert">
+                                            <strong>Toimipaikka poistettu!</strong>
+                                        </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mt-4">
+                                <label for="mokkiLista" class="col-sm-3 col-form-label">Mökit:</label>
+                                <select name="mokkiLista" id="mokkiLista" class="form-control" name="mokkiLista">
+                                </select>
+                                <div class="col-sm 2, mt-4">
+                                    <button type="submit" class="btn btn-primary" data-bs-toggle="modal"
+                                        data-bs-target="#LisaaMokki">Lisää</button>
+                                    <button type="submit" class="btn btn-primary" data-bs-toggle="modal"
+                                        data-bs-target="#PoistaMokki">Poista</button>
+                                    <button type="submit" class="btn btn-primary" data-bs-toggle="modal"
+                                        data-bs-target="#MuokkaaMokki">Muokkaa</button>
+                                        <div class="alert alert-primary col-sm-auto mt-4" id="successMokLisays-alert">
+                                            <strong>Mökki lisätty!</strong>
+                                        </div>
+                                        <div class="alert alert-warning col-sm-auto mt-4" id="failMokLisays-alert">
+                                            <strong>Ei voi lisätä, joku on persiillään</strong>
+                                        </div>
+                                        <div class="alert alert-primary col-sm-auto mt-4" id="successMokPoisto-alert">
+                                            <strong>Mökki poistettu!</strong>
+                                        </div>
+                                        <div class="alert alert-warning col-sm-auto mt-4" id="failMokPoisto-alert">
+                                            <strong>Ei voi poistaa, joku on persiillään</strong>
+                                        </div>
+                                        <div class="alert alert-primary col-sm-auto mt-4" id="successMokMuokkaa-alert">
+                                            <strong>Mökki muokattu!</strong>
+                                        </div>
+                                        <div class="alert alert-warning col-sm-auto mt-4" id="failMokMuokkaa-alert">
+                                            <strong>Ei voi muokata, joku on persiillään</strong>
+                                        </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mt-4">
+                                <label for="palveluLista" class="col-sm-3 col-form-label">Palvelut:</label>
+                                <select name="palveluLista" id="palveluLista" class="form-control" name="palveluLista">
+                                </select>
+                                <div class="col-sm 2, mt-4">
+                                    <button type="submit" class="btn btn-primary" data-bs-toggle="modal"
+                                        data-bs-target="#LisaaPalvelu">Lisää</button>
+                                    <button type="submit" class="btn btn-primary" data-bs-toggle="modal"
+                                        data-bs-target="#MuokkaaPalvelu">Muokkaa</button>
+                                    <button type="submit" class="btn btn-primary" data-bs-toggle="modal"
+                                        data-bs-target="#PoistaPalvelu">Poista</button>
+                                        <div class="alert alert-primary col-sm-auto mt-4" id="successPalveluLisays-alert">
+                                            <strong>Palvelu lisätty!</strong>
+                                        </div>
+                                        <div class="alert alert-warning col-sm-auto mt-4" id="failPalveluLisays-alert">
+                                            <strong>Ei voi lisätä, joku on persiillään</strong>
+                                        </div>
+                                        <div class="alert alert-primary col-sm-auto mt-4" id="successPalveluPoisto-alert">
+                                            <strong>Palvelu poistettu!</strong>
+                                        </div>
+                                        <div class="alert alert-warning col-sm-auto mt-4" id="failPalveluPoisto-alert">
+                                            <strong>Ei voi poistaa, joku on persiillään</strong>
+                                        </div>
+                                        <div class="alert alert-primary col-sm-auto mt-4" id="successPalveluMuokkaa-alert">
+                                            <strong>Palvelu muokattu!</strong>
+                                        </div>
+                                        <div class="alert alert-warning col-sm-auto mt-4" id="failPalveluMuokkaa-alert">
+                                            <strong>Ei voi muokata, joku on persiillään</strong>
+                                        </div>
+                                </div>
+                            </div>    
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Toimipisteen lisääminen modal -->
+                <div class="modal fade" id="LisaaToimipiste" data-bs-backdrop="static" data-bs-keyboard="false"
+                    tabindex="-1" aria-labelledby="LisaaToimipisteLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="LisaaToimipisteLabel">Lisää toimipiste</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <input class="form-control me-2" id="toimipisteenNimi" type="text"
+                                    placeholder="Toimipisteen nimi" aria-label="Tunnus" required><br>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" id="lisaaToimipiste" class="btn btn-primary"
+                                    data-bs-dismiss="modal">Lisää</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Toimipisteen poistamisen modal -->
+                <div class="modal fade" id="PoistaToimipiste" data-bs-backdrop="static" data-bs-keyboard="false"
+                    tabindex="-1" aria-labelledby="PoistaToimipisteLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="PoistaToimipisteLabel">Toimipisteen poisto</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Oletko varma, että haluat poistaa toimipisteen?</p>
+
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" id="poistaToimipiste" class="btn btn-secondary"
+                                    data-bs-dismiss="modal">Kyllä</button>
+                                <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">En</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mökin lisääminen modal -->
+                <div class="modal fade" id="LisaaMokki" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+                    aria-labelledby="LisaaMokkiLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="LisaaMokkiLabel">Lisää mökki</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <label for="kohdeMLM" class="col-sm-3 col-form-label"></label>
+                                <select name="kohdeMLM" id="kohdeMLM" class="form-control" name="kohdeMLM">
+                                    <option value="-">Valitse toimipaikka</option>
+                                </select>
+                                <input class="form-control me-2 mt-4" type="text" id="mokinNimi"
+                                    placeholder="Mökin nimi" aria-label="Tunnus" required><br>
+                                <input class="form-control me-2" type="text" id="katuosoite" placeholder="Katuosoite"
+                                    aria-label="Tunnus" required><br>
+                                <input class="form-control me-2" type="text" id="postinumero" placeholder="Postinumero"
+                                    aria-label="Tunnus" required><br>
+                                <input class="form-control me-2" type="text" id="toimipaikka" placeholder="Toimipaikka"
+                                    aria-label="Tunnus" required><br>
+                                <input class="form-control me-2" type="text" id="hinta" placeholder="Hinta"
+                                    aria-label="Tunnus" required><br>
+                                <input class="form-control me-2" type="text" id="kuvaus" placeholder="Kuvaus"
+                                    aria-label="Tunnus" required><br>
+                                <input class="form-control me-2" type="text" id="henkilomaara"
+                                    placeholder="Henkilömäärä" aria-label="Tunnus" required><br>
+                                <input class="form-control me-2" type="text" id="varustelu" placeholder="Varustelu"
+                                    aria-label="Tunnus" required><br>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" id="lisaaMokki" class="btn btn-primary"
+                                    data-bs-dismiss="modal">Lisää</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mökin muokkaaminen modal -->
+                <div class="modal fade" id="MuokkaaMokki" data-bs-backdrop="static" data-bs-keyboard="false"
+                    tabindex="-1" aria-labelledby="MuokkaaMokkiLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="MuokkaaMokkiLabel">Mökin muokkaus</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <select name="kohdeMMM" id="kohdeMMM" class="form-control" name="kohdeMMM"></select>
+                                <input class="form-control me-2 mt-4" type="text" id="MmokinNimi"
+                                    placeholder="Mökin nimi" aria-label="Tunnus" required><br>
+                                <input class="form-control me-2" type="text" id="Mkatuosoite" placeholder="Katuosoite"
+                                    aria-label="Tunnus" required><br>
+                                <input class="form-control me-2" type="text" id="Mpostinumero" placeholder="Postinumero"
+                                    aria-label="Tunnus" required><br>
+                                <input class="form-control me-2" type="text" id="Mtoimipaikka" placeholder="Toimipaikka"
+                                    aria-label="Tunnus" required><br>
+                                <input class="form-control me-2" type="text" id="Mhinta" placeholder="Hinta"
+                                    aria-label="Tunnus" required><br>
+                                <input class="form-control me-2" type="text" id="Mkuvaus" placeholder="Kuvaus"
+                                    aria-label="Tunnus" required><br>
+                                <input class="form-control me-2" type="text" id="Mhenkilomaara"
+                                    placeholder="Henkilömäärä" aria-label="Tunnus" required><br>
+                                <input class="form-control me-2" type="text" id="Mvarustelu" placeholder="Varustelu"
+                                    aria-label="Tunnus" required><br>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" id="muokkaaMokki" class="btn btn-primary"
+                                    data-bs-dismiss="modal">Tallenna</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mökin poistamisen modal -->
+                <div class="modal fade" id="PoistaMokki" data-bs-backdrop="static" data-bs-keyboard="false"
+                    tabindex="-1" aria-labelledby="PoistaMokkiLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="PoistaMokkiLabel">Mökin poisto</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Oletko varma, että haluat poistaa mökin?</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" id="poistaMokki" class="btn btn-secondary"
+                                    data-bs-dismiss="modal">Kyllä</button>
+                                <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">En</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Palvelun lisääminen modal -->
+                <div class="modal fade" id="LisaaPalvelu" data-bs-backdrop="static" data-bs-keyboard="false"
+                    tabindex="-1" aria-labelledby="LisaaPalveluLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="LisaaPalveluLabel">Lisää palvelu</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <label for="kohdePalvelu" class="col-sm-3 col-form-label"></label>
+                                <select name="kohdePalvelu" id="kohdePalvelu" class="form-control" name="kohdePalvelu">
+                                    <option value="-">Valitse toimipaikka</option>
+                                </select>
+                                <input class="form-control me-2 mt-4" type="text" id="palvelunNimi"
+                                    placeholder="Palvelun nimi" aria-label="Tunnus" required><br>
+                                <input class="form-control me-2" type="text" id="palvelunTyyppi" placeholder="Tyyppi"
+                                    aria-label="Tunnus" required><br>
+                                <input class="form-control me-2" type="text" id="palvelunKuvaus" placeholder="Kuvaus"
+                                    aria-label="Tunnus" required><br>
+                                <input class="form-control me-2" type="text" id="palvelunHinta" placeholder="Hinta"
+                                    aria-label="Tunnus" required><br>
+                                <!-- <input class="form-control me-2" type="text" id="palvelunALV" placeholder="ALV"
+                              aria-label="Tunnus" required><br> -->
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" id="lisaaPalvelu" class="btn btn-primary"
+                                    data-bs-dismiss="modal">Lisää</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Palvelun muokkaaminen modal -->
+                <div class="modal fade" id="MuokkaaPalvelu" data-bs-backdrop="static" data-bs-keyboard="false"
+                    tabindex="-1" aria-labelledby="MuokkaaPalveluLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="MuokkaaPalveluLabel">Mökin muokkaus</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <select name="kohdePMM" id="kohdePMM" class="form-control" name="kohdePMM"></select><br>
+                                <input class="form-control me-2" type="text" id="MpalvelunNimi" placeholder="Nimi"
+                                    aria-label="Tunnus" required><br>
+                                <input class="form-control me-2" type="text" id="MpalvelunTyyppi" placeholder="Tyyppi"
+                                    aria-label="Tunnus" required><br>
+                                <input class="form-control me-2" type="text" id="MpalvelunKuvaus" placeholder="Kuvaus"
+                                    aria-label="Tunnus" required><br>
+                                <input class="form-control me-2" type="text" id="MpalvelunHinta" placeholder="Hinta"
+                                    aria-label="Tunnus" required><br>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" id="muokkaaPalvelu" class="btn btn-primary"
+                                    data-bs-dismiss="modal">Tallenna</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Palvelun poistamisen modal -->
+                <div class="modal fade" id="PoistaPalvelu" data-bs-backdrop="static" data-bs-keyboard="false"
+                    tabindex="-1" aria-labelledby="PoistaPalveluLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="PoistaPalveluLabel">Palvelun poisto</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Oletko varma, että haluat poistaa palvelun?</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" id="poistaPalvelu" class="btn btn-secondary"
+                                    data-bs-dismiss="modal">Kyllä</button>
+                                <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">En</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Varaukset -->
+            <div id="tabs-2">
+                <div id="AsiakkaidenHallinta"></div>
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <form>
+                                <div class="mt-5 form-group row">
+                                    <label for="varausid" class="col-sm-3 col-form-label">Varausnro:</label>
+                                    <div class="col-sm-7">
+                                        <input class="form-control" id="varausid" name="varausid">
+                                    </div>
+                                </div>
+                                <div class="mt-2 form-group row">
+                                    <label for="etunimi" class="col-sm-3 col-form-label">Etunimi:</label>
+                                    <div class="col-sm-7">
+                                        <input class="form-control" id="etunimi" name="etunimi">
+                                    </div>
+                                </div>
+                                <div class="mt-2 form-group row">
+                                    <label for="sukunimi" class="col-sm-3 col-form-label">Sukunimi:</label>
+                                    <div class="col-sm-7">
+                                        <input class="form-control" id="sukunimi" name="etunimi">
+                                    </div>
+                                </div>
+                                <div class="mt-2 form-group row">
+                                    <div class="col-sm-7">
+                                        <button type="submit" id="haeVaraukset" class="btn btn-primary">Hae</button>
+                                    </div>
+                                </div>
+
+                            </form>
+                        </div>
+                        <div class="col-md-9">
+                            <table class="table w-75 table-hover">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">#</th>
+                                        <th scope="col">Asiakas</th>
+                                        <th scope="col">Kohde</th>
+                                        <th scope="col">Mökki</th>
+                                        <th scope="col">Tulopäivä</th>
+                                        <th scope="col">Lähtöpäivä</th>
+                                        <th scope="col">Hinta</th>
+                                        <th scope="col"> </th>
+                                    </tr>
+                                </thead>
+                                <tbody id="varaukset">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MUOKKAA VARAUSTA -->
+                <div class="modal fade" id="muokkaaVarausta" data-bs-backdrop="static" data-bs-keyboard="false"
+                    tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="staticBackdropLabel">Varauksen muokkaus</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="container-fluid">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <form>
+                                                <div class="mt-2 form-group row">
+                                                    <label for="metunimi" class="col-sm-4 col-form-label">Etunimi
+                                                    </label>
+                                                    <div class="col-sm-7">
+                                                        <input class="form-control" id="metunimi" name="metunimi"
+                                                            required>
+                                                    </div>
+                                                </div>
+                                                <div class="mt-2 form-group row">
+                                                    <label for="msukunimi" class="col-sm-4 col-form-label">Sukunimi
+                                                    </label>
+                                                    <div class="col-sm-7">
+                                                        <input class="form-control" id="msukunimi" name="msukunimi"
+                                                            required>
+                                                    </div>
+                                                </div>
+
+                                                <div class="mt-2 form-group row">
+                                                    <label for="lahiosoite" class="col-sm-4 col-form-label">Katuosoite
+                                                    </label>
+                                                    <div class="col-sm-7">
+                                                        <input class="form-control" id="lahiosoite" name="lahiosoite"
+                                                            required>
+                                                    </div>
+                                                </div>
+                                                <div class="mt-2 form-group row">
+                                                    <label for="postinumero" class="col-sm-4 col-form-label">Postinumero
+                                                    </label>
+                                                    <div class="col-sm-7">
+                                                        <input class="form-control" id="postinro" name="postinro"
+                                                            required>
+                                                    </div>
+                                                </div>
+                                                <div class="mt-2 form-group row">
+                                                    <label for="mtoimipaikka"
+                                                        class="col-sm-4 col-form-label">Postitoimipaikka
+                                                    </label>
+                                                    <div class="col-sm-7">
+                                                        <input class="form-control" id="mtoimipaikka"
+                                                            name="mtoimipaikka" required>
+                                                    </div>
+                                                </div>
+                                                <div class="mt-2 form-group row">
+                                                    <label for="email" class="col-sm-4 col-form-label">Sähköposti
+                                                    </label>
+                                                    <div class="col-sm-7">
+                                                        <input class="form-control" id="email" name="email" required>
+                                                    </div>
+                                                </div>
+                                                <div class="mt-2 form-group row">
+                                                    <label for="puhelinnro"
+                                                        class="col-sm-4 col-form-label">Puhelinnumero
+                                                    </label>
+                                                    <div class="col-sm-7">
+                                                        <input class="form-control" id="puhelinnro" name="puhelinnro"
+                                                            required>
+                                                    </div>
+                                                </div>
+                                                <div class="mt-2 form-group row">
+                                                    <div class="col-sm-7">
+                                                        <input type="checkbox" class="form-check-input checkBox"
+                                                            id="paperilasku">
+                                                        <label class="form-check-label" for="exampleCheck1">Paperilasku
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="mt-2 mb-2 form-group row">
+                                                    <div class="col-sm-7">
+                                                        <input type="checkbox" class="form-check-input checkBox"
+                                                            id="sahkopostilasku">
+                                                        <label class="form-check-label "
+                                                            for="exampleCheck1">Sähköpostilasku
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button class="btn btn-primary"
+                                                        id="tallennaVarauksenMuutokset">Tallenna
+                                                    </button>
+                                                    <button type="button" id="peruutaVarauksenMuutokset"
+                                                        class="btn btn-secondary" data-bs-dismiss="modal">Peruuta
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Laskut -->
+            <div id="tabs-3">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <form>
+                                <div class="mt-5 form-group row">
+                                    <label for="varaus_id" class="col-sm-3 col-form-label">Varausnro:
+                                    </label>
+                                    <div class="col-sm-7">
+                                        <input id="varaus_id" class="form-control" type="text" aria-label="varaus_id">
+                                    </div>
+                                </div>
+                                <div class="mt-2 form-group row">
+                                    <label for="lasku_id" class="col-sm-3 col-form-label">Laskunro:
+
+                                    </label>
+                                    <div class="col-sm-7">
+                                        <input id="lasku_id" class="form-control" type="text" aria-label="lasku_id">
+                                    </div>
+                                </div>
+                                <div class="mt-2 form-group row">
+                                    <label for="completed" class="col-sm-3 col-form-label">Tila:
+                                    </label>
+                                    <div class="col-sm-7">
+                                        <select name="kohde" id="completed" class="form-control" name="completed">
+                                            <option value="" selected>Kaikki</option>
+                                            <option value="0">Ei maksettu</option>
+                                            <option value="1">Maksettu</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mt-2 form-group row">
+                                    <div class="col-sm-7">
+                                        <button type="button" id="haeLasku" class="btn btn-primary">Hae
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-md-9">
+                            <table class="table mt-1 w-75 table-hover">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">#</th>
+                                        <th scope="col">Laskutuspäivämäärä</th>
+                                        <th scope="col">Eräpäivä</th>
+                                        <th scope="col">Paperilasku</th>
+                                        <th scope="col">Sähköpostilasku</th>
+                                        <th scope="col">Summa</th>
+                                        <th scope="col">Tila</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="laskulista">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Varausraportit -->
+            <div id="tabs-4">
+                <div id="majoittumisenRaportit" class="ms-1"></div>
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <form>
+                                <div class="mt-5 form-group row">
+                                    <label for="mista" class="col-sm-3 col-form-label">Mistä:
+                                    </label>
+                                    <div class="col-sm-7">
+                                        <input type="date" class="form-control" id="mista" name="mista">
+                                    </div>
+                                </div>
+                                <div class="mt-2 form-group row">
+                                    <label for="mihin" class="col-sm-3 col-form-label">Mihin:
+                                    </label>
+                                    <div class="col-sm-7">
+                                        <input type="date" class="form-control" id="mihin" name="mihin">
+                                    </div>
+                                </div>
+                                <div class="mt-2 form-group row">
+                                    <label for="kohdeMR" class="col-sm-3 col-form-label">Kohde:
+                                    </label>
+                                    <div class="col-sm-7">
+                                        <select name="kohdeMR" id="kohdeMR" class="form-control" name="kohdeMR">
+                                            <option value="">Valitse kohde</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mt-2 form-group row">
+                                    <div class="col-sm-7">
+                                        <button type="button" id="haeMR" class="btn btn-primary">Hae
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-md-9">
+                            <table class="table mt-1 w-75 table-hover">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">#</th>
+                                        <th scope="col">Tulopäivä</th>
+                                        <th scope="col">Lähtöpäivä</th>
+                                        <th scope="col">Mökki</th>
+                                        <th scope="col">Asiakas</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="MR">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Lisäpalveluraportit -->
+            <div id="tabs-5">
+                <div id="ostettujenLisapalveluidenRaportit" class="ms-1"></div>
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <form>
+                                <div class="mt-5 form-group row">
+                                    <label for="mista" class="col-sm-3 col-form-label">Mistä:
+                                    </label>
+                                    <div class="col-sm-7">
+                                        <input type="date" class="form-control" id="mistaOL" name="mista">
+                                    </div>
+                                </div>
+                                <div class="mt-2 form-group row">
+                                    <label for="mihin" class="col-sm-3 col-form-label">Mihin:
+                                    </label>
+                                    <div class="col-sm-7">
+                                        <input type="date" class="form-control" id="mihinOL" name="tulopaiva">
+                                    </div>
+                                </div>
+                                <div class="mt-2 form-group row">
+                                    <label for="kohdeOL" class="col-sm-3 col-form-label">Kohde:
+                                    </label>
+                                    <div class="col-sm-7">
+                                        <select name="kohdeOL" id="kohdeOL" class="form-control" name="kohdeOL">
+                                            <option value="">Valitse kohde</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mt-2 form-group row">
+                                    <div class="col-sm-7">
+                                        <button type="button" id="haeOL" class="btn btn-primary">Hae
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="col-md-9">
+                            <table class="table mt-1 w-75 table-hover">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">#</th>
+                                        <th scope="col">Tulopäivä</th>
+                                        <th scope="col">Lähtöpäivä</th>
+                                        <th scope="col">Palvelu</th>
+                                        <th scope="col">Asiakas</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="OL">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
